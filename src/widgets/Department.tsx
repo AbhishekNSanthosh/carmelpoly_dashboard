@@ -309,7 +309,7 @@ export default function Home() {
                     Edit
                   </Link>
                   <Link
-                    href={`/dashboard/department/${encodeURIComponent(code)}`}
+                    href={`https://www.carmelpoly.in/departments/${encodeURIComponent(code)}`}
                     className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm flex items-center gap-2"
                   >
                     <FaEye />
