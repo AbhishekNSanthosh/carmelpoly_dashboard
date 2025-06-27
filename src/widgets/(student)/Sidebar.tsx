@@ -20,8 +20,8 @@ export default function Sidebar() {
       icon: <FaHome className="text-[22px]" />,
     },
     {
-      title: "Application",
-      link: "/dashboard/application",
+      title: "Departments",
+      link: "/dashboard/department",
       icon: <IoIosApps className="text-[22px]" />,
     },
     // {
