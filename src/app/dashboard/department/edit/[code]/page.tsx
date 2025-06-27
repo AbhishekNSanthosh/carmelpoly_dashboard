@@ -1,7 +1,11 @@
-import EditPage from '@pages/EditPage'
-import React from 'react'
+import EditPage from '@pages/EditPage';
+import React from 'react';
 
-export default function EditApplication() {
-  return (<EditPage/>
-  )
+interface EditApplicationProps {
+  params: { code: string };
+}
+
+export default async function EditApplication({ params }: EditApplicationProps) {
+  const {code } = await params;
+  return <EditPage code={code} />;
 }

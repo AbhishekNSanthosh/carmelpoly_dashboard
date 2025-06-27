@@ -7,8 +7,9 @@ import {
   getFirestore,
   collection,
   query,
+  setDoc,
+  doc,
   getDocs,
-  addDoc,
   serverTimestamp,
 } from "firebase/firestore";
 import { app } from "@lib/firebase"; // adjust path to your firebase config
@@ -19,6 +20,7 @@ import Link from "next/link";
 interface Department {
   id: string;
   name?: string;
+  img?: string;
   code?: string;
   firstName?: string;
   lastName?: string;
@@ -96,12 +98,14 @@ export default function Home() {
     }
     setLoading(true);
     try {
-      await addDoc(collection(db, "departments"), {
-        name: departmentName,
-        code: departmentCode,
-        createdAt: serverTimestamp(),
-      });
-      router.push(`/department/edit/${departmentCode}`);
+// Create department with `code` as document ID
+        await setDoc(doc(db, "departments", departmentCode), {
+          name: departmentName,
+          code: departmentCode.toLowerCase(),
+          createdAt: serverTimestamp(),
+        });
+
+      router.push(`//dashboard/department/edit/${departmentCode}`);
     } catch (error) {
       console.error("Error creating new department:", error);
       // Handle error, e.g., show a toast notification
@@ -218,7 +222,7 @@ export default function Home() {
   {allDepartments.slice(0, 5).map((dept, index) => {
     const code = dept.code || dept.generatedId || "N/A";
     // Placeholder for department image, replace with dept.image if available
-    const imageUrl = "/logo.png";
+    const imageUrl = dept.img || "/logo.png";
     return (
       <div
         key={dept.id || index}
@@ -238,7 +242,7 @@ export default function Home() {
             {dept.name ||
               (dept?.firstName ? (
                 <>
-                  {dept.firstName} {dept.lastName}
+                  {dept.firstName}
                 </>
               ) : (
                 "N/A"
