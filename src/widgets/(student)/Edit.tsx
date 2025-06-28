@@ -1,1451 +1,743 @@
-"use client";
+"use client"
 import React, { useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
-import { app, db } from "@lib/firebase";
 import {
-  collection,
-  query,
-  where,
-  getDocs,
-  setDoc,
-  addDoc,
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { app } from "@lib/firebase";
+import {
+  getFirestore,
   doc,
-  deleteDoc,
   getDoc,
+  setDoc,
+  serverTimestamp,
+  deleteDoc,
 } from "firebase/firestore";
-import { useParams, usePathname } from "next/navigation";
-import { Application } from "../../common/interface/interface";
 import easyToast from "@components/CustomToast";
-
-export default function Edit() {
-  return(
-    <div className="">
-    </div>
-  )
-  // // const [user, setUser] = useState<any>(null);
-  // // const [isLoading, setIsLoading] = useState(true);
-  // // const [draftId, setDraftId] = useState("");
-  // // const [selectedBoard, setSelectedBoard] = useState("");
-  // // const [application, setApplication] = useState<Application>({
-  // //   id: "",
-  // //   generatedId: "",
-  // //   category: "lateral_entry",
-  // //   title: "Management Quota - Lateral Entry",
-  // //   preferenceOne: "",
-  // //   preferenceTwo: "",
-  // //   preferenceThree: "",
-  // //   preferenceFour: "",
-  // //   preferenceFive: "",
-  // //   preferenceSix: "",
-  // //   firstName: "",
-  // //   lastName: "",
-  // //   dateOfBirth: "",
-  // //   govtQuotaApplicationNo: "",
-  // //   email: "",
-  // //   placeOfBirth: "",
-  // //   gender: "",
-  // //   religion: "",
-  // //   aadhaarNo: "",
-  // //   addressLine1: "",
-  // //   addressLine2: "",
-  // //   street: "",
-  // //   district: "",
-  // //   pinCode: "",
-  // //   contactNo: "",
-  // //   alternateContactNo: "",
-  // //   course: "", // For course selection (HSE, SSLC, CBSE, etc.)
-  // //   board: "", // For selecting board (e.g., HSE, CBSE)
-  // //   institution: "",
-  // //   universityOrBoard: "",
-  // //   certificateUrl: "",
-  // //   passedOn: "",
-  // //   marks: {},
-  // //   // english: "",
-  // //   // hindi: "",
-  // //   // physics: "",
-  // //   // science: "",
-  // //   // language: "",
-  // //   // chemistry: "",
-  // //   // computerScience: "",
-  // //   // mathematics: "",
-  // //   // firstLanguagePaperOne: "",
-  // //   // firstLanguagePaperTwo: "",
-  // //   // socialScience: "",
-  // //   // biology: "",
-  // //   // informationTechnology: "",
-  // //   // communicativeEnglish: "",
-  // //   // },
-  // //   guardian: {
-  // //     name: "",
-  // //     occupation: "",
-  // //     addressLineOne: "",
-  // //     addressLineTwo: "",
-  // //     street: "",
-  // //     district: "",
-  // //     pincode: "",
-  // //     relationship: "",
-  // //     monthlyIncome: "",
-  // //     phoneNumber: "",
-  // //   },
-  // //   declarationAccepted: false, // Checkbox for declaration
-  // // });
-  // // const location = usePathname();
-  // // console.log(location?.split("/")[4]);
-  // // const params = useParams();
-  // // console.log("Params: ", params?.appId);
-
-  // // useEffect(() => {
-  // //   const auth = getAuth(app);
-  // //   const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-  // //     setUser(currentUser);
-  // //     if (currentUser?.email) {
-  // //       setApplication((prev) => ({
-  // //         ...prev,
-  // //         email: currentUser.email || "", // Provide fallback empty string if email is null
-  // //       }));
-  // //     }
-  // //     setIsLoading(false);
-  // //   });
-  // //   return () => unsubscribe();
-  // // }, []);
-
-  // // const getSubjectCount = (board: any) => {
-  // //   switch (board) {
-  // //     case "CBSE_X":
-  // //       return 5;
-  // //     case "SSLC":
-  // //       return 10;
-  // //     case "HSE_XII":
-  // //       return 6;
-  // //     case "CBSE_XII":
-  // //       return 5;
-  // //     default:
-  // //       return 0;
-  // //   }
-  // // };
-
-  // // const subjectCount = getSubjectCount(selectedBoard);
-
-  // // const generateCustomId = async (): Promise<string> => {
-  // //   const snapshot = await getDocs(collection(db, "admission_application"));
-  // //   const count = snapshot.size + 1;
-  // //   const padded = String(count).padStart(5, "0");
-  // //   return `CRML-2025-${padded}`;
-  // // };
-
-  // // const handleSubmit = async (e: React.FormEvent) => {
-  // //   e.preventDefault();
-
-  // //   try {
-  // //     const customId = await generateCustomId();
-
-  // //     // Update the application state with generatedId before saving
-  // //     const updatedApplication = {
-  // //       ...application,
-  // //       generatedId: customId,
-  // //     };
-
-  // //     // Save application to Firestore
-  // //     const docRef = await addDoc(
-  // //       collection(db, "admission_application"),
-  // //       updatedApplication
-  // //     );
-
-  // //     // If there's a draftId, delete the corresponding draft
-  // //     if (params?.appId && params?.appId !== "") {
-  // //       await deleteDoc(doc(db, "drafts", params?.appId as string));
-  // //       console.log("Draft deleted with ID:", params?.appId);
-  // //     }
-
-  // //     console.log("Application submitted with Firestore ID:", docRef.id);
-  // //     console.log("Custom ID assigned:", customId);
-  // //   } catch (e) {
-  // //     console.error("Error submitting application:", e);
-  // //   }
-  // // };
-
-  // // const saveAsDraft = async () => {
-  // //   if (!user?.email) {
-  // //     console.error("User email not available.");
-  // //     return;
-  // //   }
-
-  // //   try {
-  // //     const draftsRef = collection(db, "drafts");
-  // //     const q = query(
-  // //       draftsRef,
-  // //       where("email", "==", user.email),
-  // //       where("category", "==", "lateral_entry")
-  // //     );
-
-  // //     const querySnapshot = await getDocs(q);
-
-  // //     if (!application.category) {
-  // //       application.category = "lateral_entry"; // ensure it's added
-  // //     }
-
-  // //     if (!application.email) {
-  // //       application.email = user.email; // fallback if not already set
-  // //     }
-
-  // //     if (!querySnapshot.empty) {
-  // //       // If draft exists, update the first one found
-  // //       const existingDoc = querySnapshot.docs[0];
-  // //       await setDoc(doc(db, "drafts", existingDoc.id), application);
-  // //       console.log("Draft updated:", existingDoc.id);
-  // //       easyToast({
-  // //         message: "Draft saved",
-  // //         type: "success",
-  // //         showIcon: true,
-  // //       });
-  // //     } else {
-  // //       // Else, create a new draft
-  // //       const docRef = await addDoc(draftsRef, {
-  // //         ...application,
-  // //         category: "lateral_entry",
-  // //         email: user.email,
-  // //       });
-  // //       easyToast({
-  // //         message: "New draft created",
-  // //         type: "success",
-  // //         showIcon: true,
-  // //       });
-  // //       console.log("New draft created with ID:", docRef.id);
-  // //     }
-  // //   } catch (error) {
-  // //     console.error("Error saving draft:", error);
-  // //   }
-  // // };
-
-  // // useEffect(() => {
-  // //   const fetchApplication = async () => {
-  // //     setIsLoading(true);
-
-  // //     try {
-  // //       const auth = getAuth();
-  // //       const currentUser = auth.currentUser;
-
-  // //       if (!currentUser || !params?.appId) return;
-
-  // //       const docRef = doc(db, "drafts", params?.appId as string);
-  // //       const docSnap = await getDoc(docRef);
-
-  // //       if (docSnap.exists()) {
-  // //         const docData = docSnap.data();
-  // //         if (
-  // //           docData.email === currentUser.email &&
-  // //           docData.category === "lateral_entry"
-  // //         ) {
-  // //           setApplication(docData as Application);
-  // //           setDraftId(docSnap.id);
-  // //           console.log("Document ID:", docSnap.id);
-  // //         } else {
-  // //           console.warn("Draft found, but email or category does not match.");
-  // //         }
-  // //       } else {
-  // //         console.warn("No such draft found.");
-  // //       }
-  // //     } catch (error) {
-  // //       console.error("Error fetching application:", error);
-  // //     } finally {
-  // //       setIsLoading(false);
-  // //     }
-  // //   };
-
-  // //   fetchApplication();
-  // // }, []);
-
-  // // console.log("Applications: ", application);
-  // // console.log("Id", draftId);
-
-  // // if (isLoading) {
-  // //   return (
-  // //     <div className="w-full h-full flex items-center justify-center">
-  // //       Loading
-  // //     </div>
-  // //   );
-  // // }
-
-  // // return (
-  // //   <div className=" flex items-start flex-col justify-center space-y-4">
-  // //     <div className="bg-white w-full h-auto py-5 px-4  rounded-[5px]">
-  // //       <h3 className="text-primary-600 font-semibold text-xl">
-  // //         Management Quota - Lateral Entry
-  // //       </h3>
-  // //     </div>
-
-  // //     <form
-  // //       action=""
-  // //       onSubmit={handleSubmit}
-  // //       className=" flex items-start w-full flex-col justify-center space-y-4"
-  // //     >
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] space-y-4 flex flex-col">
-  // //         <div className="flex flex-col gap-1">
-  // //           <h6 className="font-semibold">Branch Preference</h6>
-  // //           <span className="text-gray-700 text-sm">
-  // //             Select your preferred branches in order.
-  // //           </span>
-  // //         </div>
-  // //         <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Preference 1
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   preferenceOne: e.target.value, // Update the course field with the selected value
-  // //                 }));
-  // //               }}
-  // //               value={application.preferenceOne}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select a branch</option>
-  // //               <option value="CSE">Computer Science and Engineering</option>
-  // //               <option value="ECE">
-  // //                 Electronics and Communication Engineering
-  // //               </option>
-  // //               <option value="ME">Mechanical Engineering</option>
-  // //               <option value="CE">Civil Engineering</option>
-  // //               <option value="EEE">
-  // //                 Electrical and Electronics Engineering
-  // //               </option>
-  // //             </select>
-  // //           </div>
-
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Preference 2
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   preferenceTwo: e.target.value, // Update the course field with the selected value
-  // //                 }));
-  // //               }}
-  // //               value={application.preferenceTwo}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select a branch</option>
-  // //               <option value="CSE">Computer Science and Engineering</option>
-  // //               <option value="ECE">
-  // //                 Electronics and Communication Engineering
-  // //               </option>
-  // //               <option value="ME">Mechanical Engineering</option>
-  // //               <option value="CE">Civil Engineering</option>
-  // //               <option value="EEE">
-  // //                 Electrical and Electronics Engineering
-  // //               </option>
-  // //             </select>
-  // //           </div>
-
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Preference 3
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   preferenceThree: e.target.value, // Update the course field with the selected value
-  // //                 }));
-  // //               }}
-  // //               value={application.preferenceThree}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select a branch</option>
-  // //               <option value="CSE">Computer Science and Engineering</option>
-  // //               <option value="ECE">
-  // //                 Electronics and Communication Engineering
-  // //               </option>
-  // //               <option value="ME">Mechanical Engineering</option>
-  // //               <option value="CE">Civil Engineering</option>
-  // //               <option value="EEE">
-  // //                 Electrical and Electronics Engineering
-  // //               </option>
-  // //             </select>
-  // //           </div>
-
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Preference 4
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   preferenceFour: e.target.value, // Update the course field with the selected value
-  // //                 }));
-  // //               }}
-  // //               value={application.preferenceThree}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select a branch</option>
-  // //               <option value="CSE">Computer Science and Engineering</option>
-  // //               <option value="ECE">
-  // //                 Electronics and Communication Engineering
-  // //               </option>
-  // //               <option value="ME">Mechanical Engineering</option>
-  // //               <option value="CE">Civil Engineering</option>
-  // //               <option value="EEE">
-  // //                 Electrical and Electronics Engineering
-  // //               </option>
-  // //             </select>
-  // //           </div>
-
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Preference 5
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   preferenceFive: e.target.value, // Update the course field with the selected value
-  // //                 }));
-  // //               }}
-  // //               value={application.preferenceThree}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select a branch</option>
-  // //               <option value="CSE">Computer Science and Engineering</option>
-  // //               <option value="ECE">
-  // //                 Electronics and Communication Engineering
-  // //               </option>
-  // //               <option value="ME">Mechanical Engineering</option>
-  // //               <option value="CE">Civil Engineering</option>
-  // //               <option value="EEE">
-  // //                 Electrical and Electronics Engineering
-  // //               </option>
-  // //             </select>
-  // //           </div>
-  // //         </div>
-  // //       </div>
-
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] space-y-4 flex flex-col">
-  // //         <div className="flex flex-col gap-1">
-  // //           <h6 className="font-semibold">Candidate Profile</h6>
-  // //           <span className="text-gray-700 text-sm">
-  // //             Fill in your name, email, and personal info.
-  // //           </span>
-  // //         </div>
-  // //         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  // //           {/* First Name */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               First Name
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   firstName: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.firstName}
-  // //               type="text"
-  // //               placeholder="Eg: John"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Last Name */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Last Name
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   lastName: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.lastName}
-  // //               type="text"
-  // //               placeholder="Eg: Doe"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Date of Birth */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Date of Birth
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   dateOfBirth: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.dateOfBirth}
-  // //               type="date"
-  // //               placeholder="Eg: 2000-01-01"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Email */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Email
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   email: e.target.value, // Update the course field with the selected value
-  // //                 }));
-  // //               }}
-  // //               value={application.email || ""}
-  // //               type="email"
-  // //               placeholder="Eg: john.doe@example.com"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Place of Birth */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Place of Birth
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   placeOfBirth: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.placeOfBirth}
-  // //               type="text"
-  // //               placeholder="Eg: Kochi"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Gender */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Gender
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   gender: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.gender}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select Gender</option>
-  // //               <option value="Male">Male</option>
-  // //               <option value="Female">Female</option>
-  // //               <option value="Other">Other</option>
-  // //             </select>
-  // //           </div>
-
-  // //           {/* Religion */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Religion
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   religion: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.religion}
-  // //               type="text"
-  // //               placeholder="Eg: Christianity"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Aadhaar Number */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Aadhaar Number
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   aadhaarNo: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.aadhaarNo}
-  // //               type="text"
-  // //               maxLength={12}
-  // //               placeholder="Eg: 1234 5678 9012"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Address Line 1 */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Address Line 1
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   addressLine1: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.addressLine1}
-  // //               type="text"
-  // //               placeholder="Eg: House Name"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Address Line 2 */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Address Line 2
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   addressLine2: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.addressLine2}
-  // //               type="text"
-  // //               placeholder="Eg: Apartment, Floor No."
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Street */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Street
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   street: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.street}
-  // //               type="text"
-  // //               placeholder="Eg: MG Road"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* District */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               District
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   district: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.district}
-  // //               type="text"
-  // //               placeholder="Eg: Ernakulam"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Pincode */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Pincode
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   pinCode: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.pinCode}
-  // //               type="text"
-  // //               maxLength={6}
-  // //               placeholder="Eg: 682001"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Contact Number 1 */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Contact Number
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   contactNo: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.contactNo}
-  // //               type="text"
-  // //               maxLength={10}
-  // //               placeholder="Eg: 9876543210"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Contact Number 2 */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Alternate Contact Number
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   alternateContactNo: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.alternateContactNo}
-  // //               type="text"
-  // //               maxLength={10}
-  // //               placeholder="Eg: 9123456789"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-  // //         </div>
-  // //       </div>
-
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] space-y-4 flex flex-col">
-  // //         <div className="flex flex-col gap-1">
-  // //           <h6 className="font-semibold">Academic History</h6>
-  // //           <span className="text-gray-700 text-sm">
-  // //             Provide details of your educational background and qualifications.
-  // //           </span>
-  // //         </div>
-  // //         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  // //           {/* Course */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Course
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   course: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.course}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select Course</option>
-  // //               <option value="HSE">HSE</option>
-  // //               <option value="SSLC">SSLC</option>
-  // //             </select>
-  // //           </div>
-
-  // //           {/* Name of Institution */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Name of Institution
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   institution: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.institution}
-  // //               type="text"
-  // //               placeholder="Eg: Carmel School"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* University / Board */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               University / Board
-  // //             </label>
-  // //             <select
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   universityOrBoard: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.universityOrBoard}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">Select Board</option>
-  // //               <option value="HSE">HSE</option>
-  // //               <option value="CBSE">CBSE</option>
-  // //             </select>
-  // //           </div>
-
-  // //           {/* Passed On */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Passed On
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevStat) => ({
-  // //                   ...prevStat,
-  // //                   passedOn: e.target.value,
-  // //                 }));
-  // //               }}
-  // //               value={application.passedOn}
-  // //               type="text"
-  // //               placeholder="Eg: MAR-2025"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-  // //         </div>
-  // //       </div>
-
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] space-y-4 flex flex-col">
-  // //         <div className="flex flex-col gap-1">
-  // //           <h6 className="font-semibold">Qualifying Examination</h6>
-  // //           <span className="text-gray-700 text-sm">
-  // //             Enter the marks or grade obtained in your qualifying examination.
-  // //           </span>
-  // //         </div>
-  // //         <div className="space-y-4">
-  // //           {/* Board Select */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Select Board
-  // //             </label>
-  // //             <select
-  // //               value={selectedBoard}
-  // //               onChange={(e) => setSelectedBoard(e.target.value)}
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             >
-  // //               <option value="">-- Select --</option>
-  // //               <option value="CBSE_X">CBSE (X)</option>
-  // //               <option value="SSLC">SSLC</option>
-  // //               <option value="HSE_XII">HSE (XII)</option>
-  // //               <option value="CBSE_XII">CBSE (XII)</option>
-  // //             </select>
-  // //           </div>
-
-  // //           {/* Subject Marks Input Fields */}
-  // //           {selectedBoard === "CBSE_X" && (
-  // //             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   English
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         english: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.english}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Language
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         language: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.language}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Mathematics
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         mathematics: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.mathematics}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Science
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         science: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.science}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Social Science
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         socialScience: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.socialScience}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-  // //             </div>
-  // //           )}
-
-  // //           {selectedBoard === "SSLC" && (
-  // //             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   First Language - Paper I
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         firstLanguagePaperOne: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.firstLanguagePaperOne}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   First Language - Paper II
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         firstLanguagePaperTwo: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.firstLanguagePaperTwo}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   English
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         english: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.english}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Hindi
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         hindi: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.hindi}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Social Science
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         socialScience: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.socialScience}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Physics
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         physics: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.physics}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Chemistry
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         chemistry: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.chemistry}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Biology
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         biology: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.biology}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Mathematics
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         mathematics: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.mathematics}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-
-  // //               <div className="flex flex-col">
-  // //                 <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //                   Information Technology
-  // //                 </label>
-  // //                 <input
-  // //                   onChange={(e) => {
-  // //                     setApplication((prevState) => ({
-  // //                       ...prevState,
-  // //                       marks: {
-  // //                         ...prevState.marks,
-  // //                         informationTechnology: e.target.value,
-  // //                       },
-  // //                     }));
-  // //                   }}
-  // //                   value={application.marks.informationTechnology}
-  // //                   type="text"
-  // //                   placeholder={`Eg: 95`}
-  // //                   className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //                 />
-  // //               </div>
-  // //             </div>
-  // //           )}
-  // //         </div>
-  // //       </div>
-
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] space-y-4 flex flex-col">
-  // //         <div className="flex flex-col gap-1">
-  // //           <h6 className="font-semibold">Guardian Info</h6>
-  // //           <span className="text-gray-700 text-sm">
-  // //             {" "}
-  // //             Provide guardian's details.
-  // //           </span>
-  // //         </div>
-  // //         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-  // //           {/* Name of Guardian */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Name of Guardian
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     name: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.name}
-  // //               type="text"
-  // //               placeholder="Enter Guardian's Name"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Occupation */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Occupation
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     occupation: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.occupation}
-  // //               type="text"
-  // //               placeholder="Enter Occupation"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Address Line 1 */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Address Line 1 (Residence)
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     addressLineOne: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.addressLineOne}
-  // //               type="text"
-  // //               placeholder="Eg: House Name"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Address Line 2 */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Address Line 2
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     addressLineTwo: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.addressLineTwo}
-  // //               type="text"
-  // //               placeholder="Eg: Apartment, Floor No."
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Street */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Street
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     street: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.street}
-  // //               type="text"
-  // //               placeholder="Eg: MG Road"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* District */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               District
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     district: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.district}
-  // //               type="text"
-  // //               placeholder="Eg: Ernakulam"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Pincode */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Pincode
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     pincode: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.pincode}
-  // //               type="text"
-  // //               maxLength={6}
-  // //               placeholder="Eg: 682001"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Relationship with Applicant */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Relationship with Applicant
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     relationship: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.relationship}
-  // //               type="text"
-  // //               placeholder="Enter Relationship"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Monthly Income */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Monthly Income
-  // //             </label>
-  // //             <input
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     monthlyIncome: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.monthlyIncome}
-  // //               type="number"
-  // //               placeholder="Enter Monthly Income"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-
-  // //           {/* Phone Number */}
-  // //           <div className="flex flex-col">
-  // //             <label className="text-gray-800 text-sm mb-1 font-medium">
-  // //               Phone Number
-  // //             </label>
-  // //             <input
-  // //               type="text"
-  // //               onChange={(e) => {
-  // //                 setApplication((prevState) => ({
-  // //                   ...prevState,
-  // //                   guardian: {
-  // //                     ...prevState.guardian,
-  // //                     phoneNumber: e.target.value,
-  // //                   },
-  // //                 }));
-  // //               }}
-  // //               value={application.guardian.phoneNumber}
-  // //               maxLength={10}
-  // //               placeholder="Enter Phone Number"
-  // //               className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-  // //             />
-  // //           </div>
-  // //         </div>
-  // //       </div>
-
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] space-y-4 flex flex-col">
-  // //         <div className="flex flex-col gap-1">
-  // //           <h6 className="font-semibold">Declaration</h6>
-  // //           <span className="text-gray-700 text-sm">
-  // //             {" "}
-  // //             Confirm the declaration.
-  // //           </span>
-  // //         </div>
-  // //         <div className="flex items-center space-x-3">
-  // //           <input
-  // //             onChange={(e) => {
-  // //               setApplication((prevState) => ({
-  // //                 ...prevState,
-  // //                 declarationAccepted: e.target.checked,
-  // //               }));
-  // //             }}
-  // //             checked={application.declarationAccepted}
-  // //             type="checkbox"
-  // //             id="declaration"
-  // //             className="h-4 w-4 border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
-  // //           />
-  // //           <label htmlFor="declaration" className="text-sm text-gray-700">
-  // //             I declare that the information provided is true and accurate.
-  // //           </label>
-  // //         </div>
-  // //       </div>
-
-  // //       <div className="bg-white w-full h-auto py-5 px-4 rounded-[5px] gap-3 flex flex-row">
-  // //         <button
-  // //           className="flex-1 bg-primary-50 text-primary-600 font-semibold py-3 rounded-[10px]"
-  // //           type="button"
-  // //           onClick={(e) => {
-  // //             e.preventDefault();
-  // //             saveAsDraft();
-  // //           }}
-  // //         >
-  // //           Save as draft
-  // //         </button>
-  // //         <button
-  // //           className="flex-1 bg-primary-600 py-3 rounded-[10px] text-white font-semibold"
-  // //           type="submit"
-  // //         >
-  // //           Submit
-  // //         </button>
-  // //       </div>
-  // //     </form>
-  // //   </div>
-  // );
+import { FaTrash, FaUserTie, FaChalkboardTeacher, FaInfoCircle, FaBullseye, FaLightbulb } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Redefining Faculty interface locally to resolve import issue
+export interface Faculty {
+  id: string;
+  name: string;
+  qualification: string;
+  designation: string;
+  imageUrl: string;
 }
+
+interface EditProps {
+  code: string;
+  onSave?: (text: string, imageUrl: string) => void;
+}
+
+const Edit: React.FC<EditProps> = ({ code, onSave }) => {
+  const [text, setText] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(""); // For image preview
+  const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [deptName, setDeptName] = useState("");
+  const [deptCode, setDeptCode] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [vision, setVision] = useState<string[]>([""]);
+  const [mission, setMission] = useState<string[]>([""]);
+  const [faculty, setFaculty] = useState<Faculty[]>([]);
+  const [isFacultyModalOpen, setIsFacultyModalOpen] = useState(false);
+  const [newFacultyName, setNewFacultyName] = useState("");
+  const [newFacultyQualification, setNewFacultyQualification] = useState("");
+  const [newFacultyDesignation, setNewFacultyDesignation] = useState("");
+  const [newFacultyImage, setNewFacultyImage] = useState<File | null>(null);
+  const [newFacultyImagePreview, setNewFacultyImagePreview] = useState<
+    string | null
+  >(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const router = useRouter();
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  useEffect(() => {
+    const fetchDepartmentData = async () => {
+      if (!code) return;
+      setLoading(true);
+      try {
+        const docRef = doc(db, "departments", code);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setDeptName(data.name || "");
+          setDeptCode(data.code || "");
+          setText(data.description || "");
+          const url = data.imageUrl || "";
+          setImageUrl(url);
+          setPreviewUrl(url);
+          setVision(data.vision && data.vision.length > 0 ? data.vision : [""]);
+          setMission(
+            data.mission && data.mission.length > 0 ? data.mission : [""]
+          );
+          setFaculty(data.faculty || []);
+        } else {
+          console.warn("No department found with code:", code);
+          easyToast({
+            type: "error",
+            message: "Department not found.",
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching department:", err);
+        easyToast({
+          type: "error",
+          message: "Failed to fetch department data.",
+        });
+      }
+      setLoading(false);
+    };
+
+    fetchDepartmentData();
+  }, [code, db]);
+
+  const handlePointChange = (
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    index: number,
+    value: string
+  ) => {
+    setter((prev) => {
+      const newPoints = [...prev];
+      newPoints[index] = value;
+      return newPoints;
+    });
+  };
+
+  const addPoint = (setter: React.Dispatch<React.SetStateAction<string[]>>) => {
+    setter((prev) => [...prev, ""]);
+  };
+
+  const removePoint = (
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+    index: number
+  ) => {
+    setter((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddFaculty = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (
+      !newFacultyName ||
+      !newFacultyQualification ||
+      !newFacultyDesignation ||
+      !newFacultyImage
+    ) {
+      easyToast({
+        type: "error",
+        message: "Please fill all fields and select an image.",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const storage = getStorage();
+      const imageRef = storageRef(
+        storage,
+        `department/${code}/faculty/${Date.now()}_${newFacultyImage.name}`
+      );
+      await uploadBytes(imageRef, newFacultyImage);
+      const imageUrl = await getDownloadURL(imageRef);
+
+      const newFaculty: Faculty = {
+        id: `faculty-${Date.now()}`,
+        name: newFacultyName,
+        qualification: newFacultyQualification,
+        designation: newFacultyDesignation,
+        imageUrl,
+      };
+
+      setFaculty((prev) => [...prev, newFaculty]);
+
+      // Reset form and close modal
+      setNewFacultyName("");
+      setNewFacultyQualification("");
+      setNewFacultyDesignation("");
+      setNewFacultyImage(null);
+      setNewFacultyImagePreview(null);
+      setIsFacultyModalOpen(false);
+    } catch (error) {
+      console.error("Error uploading image or submitting faculty:", error);
+      easyToast({ type: "error", message: "Failed to add faculty member." });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveFaculty = (id: string) => {
+    // Also consider deleting the image from storage
+    setFaculty((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!imageUrl) return;
+    setDeleting(true);
+    try {
+      const imageRef = storageRef(storage, imageUrl);
+      await deleteObject(imageRef);
+      setImageUrl("");
+      setPreviewUrl("");
+      setImage(null);
+
+      await setDoc(
+        doc(db, "departments", code),
+        { imageUrl: "" },
+        { merge: true }
+      );
+      easyToast({ type: "success", message: "Image deleted." });
+      onSave?.(text, "");
+    } catch (err) {
+      console.error("Error deleting image:", err);
+      easyToast({ type: "error", message: "Failed to delete image." });
+    }
+    setDeleting(false);
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      if (!deptName || !deptCode) {
+        easyToast({
+          type: "error",
+          message: "Department name and code cannot be empty.",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Check if new code is already in use, if it has changed
+      if (deptCode !== code) {
+        const newDocRef = doc(db, "departments", deptCode);
+        const newDocSnap = await getDoc(newDocRef);
+        if (newDocSnap.exists()) {
+          easyToast({
+            type: "error",
+            message: `Department code "${deptCode}" is already in use.`,
+          });
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      let finalImageUrl = imageUrl;
+
+      // Handle image upload
+      if (image) {
+        const imageCode = deptCode || code; // Use new code if available
+        const newImageRef = storageRef(
+          storage,
+          `department/${imageCode}/${Date.now()}_${image.name}`
+        );
+        await uploadBytes(newImageRef, image);
+        finalImageUrl = await getDownloadURL(newImageRef);
+
+        // Delete old image if it exists and is different
+        if (imageUrl && imageUrl !== finalImageUrl) {
+          try {
+            const oldImageRef = storageRef(storage, imageUrl);
+            await deleteObject(oldImageRef);
+          } catch (e) {
+            console.warn("Failed to delete old image, but continuing:", e);
+          }
+        }
+      }
+
+      const dataToSave = {
+        name: deptName,
+        code: deptCode.toLowerCase(),
+        description: text,
+        imageUrl: finalImageUrl,
+        vision: vision.filter((v) => v.trim() !== ""),
+        mission: mission.filter((m) => m.trim() !== ""),
+        faculty: faculty,
+        updatedAt: serverTimestamp(),
+      };
+
+      if (deptCode === code) {
+        // Code hasn't changed, just update the document
+        await setDoc(doc(db, "departments", code), dataToSave, {
+          merge: true,
+        });
+      } else {
+        // Code has changed, create new doc and delete old one
+        const oldDocRef = doc(db, "departments", code);
+        const oldDocSnap = await getDoc(oldDocRef);
+
+        if (oldDocSnap.exists()) {
+          const oldData = oldDocSnap.data();
+          await setDoc(doc(db, "departments", deptCode), {
+            ...oldData, // Preserve created_at and other fields
+            ...dataToSave,
+          });
+          await deleteDoc(oldDocRef);
+        } else {
+          // old doc not found, just create a new one
+          await setDoc(doc(db, "departments", deptCode), dataToSave, {
+            merge: true,
+          });
+        }
+      }
+
+      onSave?.(text, finalImageUrl);
+      setImageUrl(finalImageUrl);
+      setPreviewUrl(finalImageUrl);
+      setImage(null);
+      easyToast({ type: "success", message: "Department saved!" });
+
+      if (deptCode !== code) {
+        // Redirect to new page if code changed
+        router.push(`/dashboard/department/edit/${deptCode}`);
+      }
+    } catch (err) {
+      console.error("Error saving department:", err);
+      easyToast({ type: "error", message: "Failed to save department." });
+    }
+    setIsSaving(false);
+  };
+
+  const handleNewFacultyImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setNewFacultyImage(file);
+      const objectUrl = URL.createObjectURL(file);
+      setNewFacultyImagePreview(objectUrl);
+    }
+  };
+
+  // Move faculty up in the list
+  const moveFacultyUp = (index: number) => {
+    if (index === 0) return;
+    setFaculty((prev) => {
+      const updated = [...prev];
+      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      return updated;
+    });
+  };
+
+  // Move faculty down in the list
+  const moveFacultyDown = (index: number) => {
+    if (index === faculty.length - 1) return;
+    setFaculty((prev) => {
+      const updated = [...prev];
+      [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+      return updated;
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen w-full">
+        <div className="flex space-x-2 mb-4">
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="block w-4 h-4 bg-primary-600 rounded-full"
+              animate={{
+                y: [0, -12, 0],
+                opacity: [0.7, 1, 0.7],
+              }}
+              transition={{
+                repeat: Infinity,
+                duration: 0.8,
+                delay: i * 0.15,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </div>
+        <span className="text-lg text-gray-600 font-medium animate-pulse">Loading…</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-6xl mx-auto px-2 md:px-8 py-4">
+      {/* Page Heading */}
+      <div className="flex items-center gap-3 mb-8">
+        <FaInfoCircle className="text-primary-600 text-3xl" />
+        <h1 className="text-3xl font-bold text-gray-900">Edit Department</h1>
+      </div>
+
+      {/* Department Info Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 mb-8 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div>
+          <label htmlFor="dept-name" className="mb-2 block font-semibold text-gray-800">Department Name</label>
+          <input
+            id="dept-name"
+            type="text"
+            value={deptName}
+            onChange={(e) => setDeptName(e.target.value)}
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+            placeholder="Enter department name"
+          />
+        </div>
+        <div>
+          <label htmlFor="dept-code" className="mb-2 block font-semibold text-gray-800">Department Code</label>
+          <input
+            id="dept-code"
+            type="text"
+            value={deptCode}
+            onChange={(e) => setDeptCode(e.target.value)}
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+            placeholder="Enter department code"
+          />
+          <p className="text-sm text-gray-500 mt-2">Original Code: <span className="font-mono">{code}</span></p>
+        </div>
+      </div>
+
+      {/* Description Section */}
+      <div className="mb-10">
+        <div className="flex items-center gap-2 mb-2">
+          <FaChalkboardTeacher className="text-primary-600" />
+          <label htmlFor="edit-text" className="font-semibold text-gray-800">Department Description</label>
+        </div>
+        <textarea
+          id="edit-text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={6}
+          className="w-full min-h-[120px] p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 text-base resize-y transition"
+          placeholder="Enter your department description..."
+        />
+      </div>
+
+      {/* Image Upload Section */}
+      <div className="mb-12">
+        <div className="flex items-center gap-2 mb-2">
+          <FaUserTie className="text-primary-600" />
+          <span className="font-semibold text-gray-800">Department Image</span>
+        </div>
+        <div className="flex flex-col md:flex-row gap-6 items-center">
+          <div className="relative w-full max-w-xs min-h-[200px] flex items-center justify-center bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+            {previewUrl ? (
+              <>
+                <img
+                  src={previewUrl}
+                  alt="Department"
+                  className="w-full h-[200px] object-cover rounded-lg shadow"
+                />
+                <button
+                  type="button"
+                  onClick={handleDeleteImage}
+                  disabled={deleting}
+                  className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-full shadow-md text-xs font-semibold z-10 transition-opacity"
+                  aria-label="Delete department image"
+                  title="Delete image"
+                >
+                  {deleting ? "Deleting..." : <FaTrash />}
+                </button>
+              </>
+            ) : (
+              <div className="text-center text-gray-400">No image uploaded</div>
+            )}
+          </div>
+          <div className="w-full max-w-xs">
+            <label
+              htmlFor="image-upload"
+              className="w-full text-center bg-white border border-gray-300 rounded-md py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition"
+            >
+              {image ? `Selected: ${image.name}` : "Choose New Image"}
+            </label>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Vision and Mission Section */}
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12">
+        {/* Vision Section */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-2">
+            <FaLightbulb className="text-primary-600" />
+            <h2 className="text-xl font-bold text-gray-800">Vision</h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            {vision.map((point, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <textarea
+                  value={point}
+                  onChange={(e) => handlePointChange(setVision, index, e.target.value)}
+                  className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+                  placeholder={`Vision point ${index + 1}`}
+                  rows={2}
+                />
+                <button
+                  type="button"
+                  onClick={() => removePoint(setVision, index)}
+                  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full flex-shrink-0"
+                  aria-label="Remove vision point"
+                  title="Remove"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => addPoint(setVision)}
+              className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-md self-start mt-2 transition"
+            >
+              + Add Vision Point
+            </button>
+          </div>
+        </div>
+
+        {/* Mission Section */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-2">
+            <FaBullseye className="text-primary-600" />
+            <h2 className="text-xl font-bold text-gray-800">Mission</h2>
+          </div>
+          <div className="flex flex-col gap-4">
+            {mission.map((point, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <textarea
+                  value={point}
+                  onChange={(e) => handlePointChange(setMission, index, e.target.value)}
+                  className="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+                  placeholder={`Mission point ${index + 1}`}
+                  rows={2}
+                />
+                <button
+                  type="button"
+                  onClick={() => removePoint(setMission, index)}
+                  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full flex-shrink-0"
+                  aria-label="Remove mission point"
+                  title="Remove"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => addPoint(setMission)}
+              className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-md self-start mt-2 transition"
+            >
+              + Add Mission Point
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Faculty Section */}
+      <div className="mt-16">
+        <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <FaUserTie className="text-primary-600" />
+            <h2 className="text-2xl font-bold text-gray-800">Faculty Members</h2>
+          </div>
+          <button
+            onClick={() => setIsFacultyModalOpen(true)}
+            className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-md transition"
+          >
+            + Add New Faculty
+          </button>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+        <AnimatePresence>
+            {faculty.map((member, index) => (
+              <motion.div
+                key={member.id}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                className="relative flex items-center gap-4 bg-gradient-to-r from-primary-50 via-white to-white p-5 rounded-2xl border-l-8 border-primary-600 shadow-md hover:shadow-xl hover:scale-[1.02]"
+              >
+                {/* Avatar */}
+                <div className="flex-shrink-0 w-20 h-20 rounded-full bg-gray-100 border-4 border-primary-200 flex items-center justify-center overflow-hidden shadow">
+                  {member.imageUrl ? (
+                    <img
+                      src={member.imageUrl}
+                      alt={member.name}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                  ) : (
+                    <FaUserTie className="text-4xl text-primary-400" />
+                  )}
+                </div>
+                {/* Info */}
+                <div className="flex-grow min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-bold text-lg text-gray-900 truncate">{member.name}</h3>
+                    <span className="ml-2 px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold">{member.designation}</span>
+                  </div>
+                  <p className="text-gray-500 text-sm truncate">{member.qualification}</p>
+                </div>
+                {/* Actions */}
+                <div className="flex flex-col gap-2 ml-2 items-center">
+                  <button
+                    onClick={() => moveFacultyUp(index)}
+                    disabled={index === 0}
+                    className="text-base bg-gray-200 hover:bg-primary-100 text-primary-700 rounded-full w-8 h-8 flex items-center justify-center disabled:opacity-40 transition"
+                    aria-label="Move up"
+                    title="Move up"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => moveFacultyDown(index)}
+                    disabled={index === faculty.length - 1}
+                    className="text-base bg-gray-200 hover:bg-primary-100 text-primary-700 rounded-full w-8 h-8 flex items-center justify-center disabled:opacity-40 transition"
+                    aria-label="Move down"
+                    title="Move down"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    onClick={() => handleRemoveFaculty(member.id)}
+                    className="bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center mt-2 shadow"
+                    aria-label="Remove faculty"
+                    title="Remove"
+                  >
+                    <FaTrash />
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {isFacultyModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+            <h2 className="text-2xl font-bold mb-6">Add Faculty Member</h2>
+            <form onSubmit={handleAddFaculty}>
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={newFacultyName}
+                    onChange={(e) => setNewFacultyName(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="qualification"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Qualification
+                  </label>
+                  <input
+                    type="text"
+                    id="qualification"
+                    value={newFacultyQualification}
+                    onChange={(e) =>
+                      setNewFacultyQualification(e.target.value)
+                    }
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="designation"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Designation
+                  </label>
+                  <input
+                    type="text"
+                    id="designation"
+                    value={newFacultyDesignation}
+                    onChange={(e) => setNewFacultyDesignation(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="image"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Image
+                  </label>
+                  <input
+                    type="file"
+                    id="image"
+                    accept="image/*"
+                    onChange={handleNewFacultyImageChange}
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                  {newFacultyImagePreview && (
+                    <img
+                      src={newFacultyImagePreview}
+                      alt="Preview"
+                      className="mt-4 w-32 h-32 object-cover rounded-md"
+                    />
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end gap-4 mt-8">
+                <button
+                  type="button"
+                  onClick={() => setIsFacultyModalOpen(false)}
+                  className="px-4 py-2 bg-gray-200 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUploading}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-md disabled:bg-gray-400"
+                >
+                  {isUploading ? "Submitting..." : "Submit"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Save Button */}
+      <button
+        onClick={handleSave}
+        disabled={isSaving}
+        className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg shadow-lg font-semibold text-lg transition duration-200 flex items-center z-50"
+        aria-label="Save changes"
+      >
+        {isSaving ? "Saving..." : "Save Changes"}
+      </button>
+    </div>
+  );
+};
+
+export default Edit;

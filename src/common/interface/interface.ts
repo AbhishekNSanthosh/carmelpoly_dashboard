@@ -131,3 +131,17 @@ export interface ErrorState {
     declarationAccepted: boolean; // Checkbox for declaration
     createdAt?: Timestamp;
 }
+
+export interface User {
+  uid: string;
+  email: string | null;
+  // Add other user properties as needed
+}
+
+export interface Faculty {
+  id: string;
+  name: string;
+  qualification: string;
+  designation: string;
+  imageUrl: string;
+}

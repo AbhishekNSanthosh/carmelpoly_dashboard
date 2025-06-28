@@ -1,8 +1,8 @@
 import Edit from '@widgets/(student)/Edit'
 import React from 'react'
 
-export default function EditPage() {
+export default function EditPage({code}: { code: string }) {
   return (
-   <Edit/>
+   <Edit code={code} />
   )
 }
