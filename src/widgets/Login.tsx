@@ -162,7 +162,7 @@ export default function LoginPage() {
         <button
           onClick={() => setTab("signup")}
           className={`text-sm font-medium px-4 py-2 rounded-md ${
-            tab === "signup" ? "bg-primary-500 text-white" : "bg-gray-200"
+            tab === "signup" ? "bg-primary text-white" : "bg-gray-200"
           }`}
         >
           Create Account
@@ -170,7 +170,7 @@ export default function LoginPage() {
         <button
           onClick={() => setTab("login")}
           className={`text-sm font-medium px-4 py-2 rounded-md ${
-            tab === "login" ? "bg-primary-500 text-white" : "bg-gray-200"
+            tab === "login" ? "bg-primary text-white" : "bg-gray-200"
           }`}
         >
           Login
@@ -197,7 +197,7 @@ export default function LoginPage() {
         <button
           disabled={isSigningIn}
           onClick={tab === "login" ? handleLogin : handleSignUp}
-          className={`bg-primary-500 text-white rounded-md py-3 text-sm hover:bg-primary-600 ${
+          className={`bg-primary text-white rounded-md py-3 text-sm hover:bg-primary ${
             isSigningIn ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
           }`}
         >
@@ -269,7 +269,7 @@ export default function LoginPage() {
               </button>
               <button
                 onClick={handlePasswordReset}
-                className="bg-primary-500 text-white px-4 py-2 rounded-md text-sm hover:bg-primary-600"
+                className="bg-primary text-white px-4 py-2 rounded-md text-sm hover:bg-primary"
                 disabled={isSendingReset}
               >
                 {isSendingReset ? "Sending..." : "Send Reset Link"}

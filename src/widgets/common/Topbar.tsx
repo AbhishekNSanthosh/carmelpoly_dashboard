@@ -98,7 +98,7 @@ export default function Topbar({ user }: { user: any }) {
               />
             </div>
           ) : (
-            <div className="w-[45px] h-[45px] uppercase rounded-full bg-primary-500 flex items-center justify-center text-white font-bold">
+            <div className="w-[45px] h-[45px] uppercase rounded-full bg-primary flex items-center justify-center text-white font-bold">
               {displayName.charAt(0)}
             </div>
           )}
@@ -151,7 +151,7 @@ export default function Topbar({ user }: { user: any }) {
                 }}
               >
                 {location === menuItem?.link && (
-                  <div className="h-full w-2 rounded-r-[20px] absolute left-[-1px] top-0 bg-primary-600"></div>
+                  <div className="h-full w-2 rounded-r-[20px] absolute left-[-1px] top-0 bg-primary"></div>
                 )}
                 <div className="flex mt-[-3px]">{menuItem?.icon}</div>
                 <span className="text-[1.1rem]">{menuItem?.title}</span>

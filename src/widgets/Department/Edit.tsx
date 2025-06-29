@@ -353,7 +353,7 @@ const Edit: React.FC<EditProps> = ({ code, onSave }) => {
           {[0, 1, 2].map((i) => (
             <motion.span
               key={i}
-              className="block w-4 h-4 bg-primary-600 rounded-full"
+              className="block w-4 h-4 bg-primary rounded-full"
               animate={{
                 y: [0, -12, 0],
                 opacity: [0.7, 1, 0.7],
@@ -503,7 +503,7 @@ const Edit: React.FC<EditProps> = ({ code, onSave }) => {
             <button
               type="button"
               onClick={() => addPoint(setVision)}
-              className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-md self-start mt-2 transition"
+              className="bg-primary hover:bg-primary-700 text-white p-2 rounded-md self-start mt-2 transition"
             >
               + Add Vision Point
             </button>
@@ -540,7 +540,7 @@ const Edit: React.FC<EditProps> = ({ code, onSave }) => {
             <button
               type="button"
               onClick={() => addPoint(setMission)}
-              className="bg-primary-600 hover:bg-primary-700 text-white p-2 rounded-md self-start mt-2 transition"
+              className="bg-primary hover:bg-primary-700 text-white p-2 rounded-md self-start mt-2 transition"
             >
               + Add Mission Point
             </button>
@@ -557,7 +557,7 @@ const Edit: React.FC<EditProps> = ({ code, onSave }) => {
           </div>
           <button
             onClick={() => setIsFacultyModalOpen(true)}
-            className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-md transition"
+            className="bg-primary hover:bg-primary-700 text-white font-semibold py-2 px-4 rounded-md transition"
           >
             + Add New Faculty
           </button>
@@ -717,7 +717,7 @@ const Edit: React.FC<EditProps> = ({ code, onSave }) => {
                 <button
                   type="submit"
                   disabled={isUploading}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md disabled:bg-gray-400"
+                  className="px-4 py-2 bg-primary text-white rounded-md disabled:bg-gray-400"
                 >
                   {isUploading ? "Submitting..." : "Submit"}
                 </button>
@@ -731,7 +731,7 @@ const Edit: React.FC<EditProps> = ({ code, onSave }) => {
       <button
         onClick={handleSave}
         disabled={isSaving}
-        className="fixed bottom-6 right-6 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg shadow-lg font-semibold text-lg transition duration-200 flex items-center z-50"
+        className="fixed bottom-6 right-6 bg-primary hover:bg-primary-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg shadow-lg font-semibold text-lg transition duration-200 flex items-center z-50"
         aria-label="Save changes"
       >
         {isSaving ? "Saving..." : "Save Changes"}

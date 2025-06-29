@@ -1,4 +1,4 @@
-import Home from "@widgets/(student)/Home";
+import Home from "@widgets/common/Home";
 import React from "react";
 
 export default function HomePage() {

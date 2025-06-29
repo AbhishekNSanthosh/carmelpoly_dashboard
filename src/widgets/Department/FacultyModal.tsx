@@ -107,7 +107,7 @@ const FacultyModal: React.FC<FacultyModalProps> = ({
           </div>
           <div className="flex justify-end gap-4 mt-8">
             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 rounded-md">Cancel</button>
-            <button type="submit" disabled={isUploading} className="px-4 py-2 bg-primary-600 text-white rounded-md disabled:bg-gray-400">
+            <button type="submit" disabled={isUploading} className="px-4 py-2 bg-primary text-white rounded-md disabled:bg-gray-400">
               {isUploading ? "Submitting..." : "Submit"}
             </button>
           </div>

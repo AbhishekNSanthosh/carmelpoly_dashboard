@@ -163,7 +163,7 @@ export default function Home() {
         <p className="mb-4 text-lg">You Don't Have Any Departments.</p>
         <button
           onClick={handleCreateNew}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-blue-700"
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
         >
           Create New
         </button>
@@ -214,7 +214,7 @@ export default function Home() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-700"
                 >
                   Submit
                 </button>
@@ -239,7 +239,7 @@ export default function Home() {
             onClick={() => {
               setShowModal(true);
             }} // <-- implement this function
-            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md mt-2"
+            className="bg-primary hover:bg-primary-700 text-white px-4 py-2 rounded-md mt-2"
           >
             Create New Department
           </button>
@@ -310,7 +310,7 @@ export default function Home() {
                   </Link>
                   <Link
                     href={`https://www.carmelpoly.in/departments/${encodeURIComponent(code)}`}
-                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-sm flex items-center gap-2"
+                    className="px-4 py-2 bg-primary hover:bg-primary-700 text-white rounded-lg shadow-sm flex items-center gap-2"
                   >
                     <FaEye />
                     Preview
@@ -368,7 +368,7 @@ export default function Home() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
+                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-700"
                 >
                   Submit
                 </button>

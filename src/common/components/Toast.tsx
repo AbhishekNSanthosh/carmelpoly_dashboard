@@ -30,7 +30,7 @@ const Toast: React.FC<ToastProps> = ({
       textColor = "text-white";
       break;
     case "info":
-      backgroundColor = "bg-azure-600"; // Blue background for info
+      backgroundColor = "bg-blue-600"; // Blue background for info
       textColor = "text-white";
       break;
     default:

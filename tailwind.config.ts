@@ -9,28 +9,42 @@ module.exports = {
   ],
   theme: {
     colors: {
-      slk: {
-        regular: "#133c25",
-        light: "#239254",
-        dark: "#d5e6dc",
-        black: {
-          100: "#161617",
-          200: "#151515",
-          300: "#0B0B0C"
-        },
+      primary: {
+        DEFAULT: '#ff0000',
+        light: '#ff5757',
+        dark: '#b10303',
       },
-      white: "#ffffff",
-      black: {
-        100: "#111111",
-        200: "#222222",
-        300: "#333333",
-        400: "#444444",
-        500: "#555555",
-        600: "#666666",
-        700: "#777777",
-        800: "#888888",
-        900: "#999999",
+      secondary: {
+        DEFAULT: '#1E3A8A',
+        light: '#5C79D1',
+        dark: '#102A61',
       },
+      accent: {
+        yellow: '#FFD54F',
+        soft: '#FFE082',
+      },
+      background: {
+        DEFAULT: '#FAFAFA',
+        surface: '#FFFFFF',
+      },
+      text: {
+        primary: '#1a1a1a',
+        secondary: '#666666',
+      },
+      red: {
+        50: '#fff0f0',
+        100: '#ffdddd',
+        200: '#ffc0c0',
+        300: '#ff9494',
+        400: '#ff5757',
+        500: '#ff2323',
+        600: '#ff0000',
+        700: '#d70000',
+        800: '#b10303',
+        900: '#920a0a',
+        950: '#500000',
+      },
+      white: "#FFFFFF",
       gray: {
         100: "#f7fafc",
         200: "#edf2f7",
@@ -55,21 +69,7 @@ module.exports = {
         900: '#0b5c0d',
         950: '#003404',
       },
-      
-      red: {
-        50: '#fff0f0',
-        100: '#ffdddd',
-        200: '#ffc0c0',
-        300: '#ff9494',
-        400: '#ff5757',
-        500: '#ff2323',
-        600: '#ff0000',
-        700: '#d70000',
-        800: '#b10303',
-        900: '#920a0a',
-        950: '#500000',
-      },
-      primary:{
+      blue:{
         50: '#edf7ff',
         100: '#d8edff',
         200: '#b9dfff',
@@ -82,7 +82,7 @@ module.exports = {
         900: '#143e94',
         950: '#11275a',
     },
-    },
+    } ,
     extend: {},
   },
   plugins: [],

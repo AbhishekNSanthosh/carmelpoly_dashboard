@@ -87,7 +87,7 @@ export default function Home() {
         <p className="mb-4 text-lg">You haven't submitted any application.</p>
         <button
           onClick={handleCreateNew}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-blue-700"
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700"
         >
           Create New
         </button>
@@ -103,7 +103,7 @@ export default function Home() {
                 <div className="flex flex-col space-y-3">
                   <Link
                     href={"/dashboard/application/management/lateral-entry"}
-                    className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                   >
                     Management Quota - Lateral Entry
                   </Link>
@@ -111,19 +111,19 @@ export default function Home() {
                     href={
                       "/dashboard/application/management/merit-lateral-entry"
                     }
-                    className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                   >
                     Management Merit - Lateral Entry
                   </Link>
                   <Link
                     href={"/dashboard/application/management/regular"}
-                    className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                   >
                     Management Quota - Regular
                   </Link>
                   <Link
                     href={"/dashboard/application/management/merit-regular"}
-                    className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                   >
                     Management Merit - Regular
                   </Link>
@@ -154,7 +154,7 @@ export default function Home() {
             onClick={() => {
               setShowModal(true);
             }} // <-- implement this function
-            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md mt-2"
+            className="bg-primary hover:bg-primary-700 text-white px-4 py-2 rounded-md mt-2"
           >
             Create New Application
           </button>
@@ -175,25 +175,25 @@ export default function Home() {
               <div className="flex flex-col space-y-3">
                 <Link
                   href={"/dashboard/application/management/lateral-entry"}
-                  className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                 >
                   Management Quota - Lateral Entry
                 </Link>
                 <Link
                   href={"/dashboard/application/management/merit-lateral-entry"}
-                  className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                 >
                   Management Merit - Lateral Entry
                 </Link>
                 <Link
                   href={"/dashboard/application/management/regular"}
-                  className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                 >
                   Management Quota - Regular
                 </Link>
                 <Link
                   href={"/dashboard/application/management/merit-regular"}
-                  className="px-4 py-3 bg-primary-600 text-white rounded hover:bg-blue-700"
+                  className="px-4 py-3 bg-primary text-white rounded hover:bg-blue-700"
                 >
                   Management Merit - Regular
                 </Link>
@@ -239,7 +239,7 @@ export default function Home() {
             onClick={() => {
               setShowModal(true);
             }} // <-- implement this function
-            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md mt-2"
+            className="bg-primary hover:bg-primary-700 text-white px-4 py-2 rounded-md mt-2"
           >
             View all applications
           </Link>

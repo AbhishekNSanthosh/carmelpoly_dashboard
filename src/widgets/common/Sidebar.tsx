@@ -9,6 +9,8 @@ import { FaHome } from "react-icons/fa";
 import { MdScheduleSend } from "react-icons/md";
 import { getAuth, signOut } from "firebase/auth";
 import easyToast from "@components/CustomToast";
+import { IoSettingsSharp } from "react-icons/io5";
+import { BiSolidCommentEdit } from "react-icons/bi";
 
 export default function Sidebar() {
   const location = usePathname();
@@ -19,15 +21,25 @@ export default function Sidebar() {
       link: "/dashboard/home",
       icon: <FaHome className="text-[22px]" />,
     },
-    {
-      title: "Departments",
-      link: "/dashboard/department",
-      icon: <IoIosApps className="text-[22px]" />,
+     {
+      title: "News",
+      link: "/dashboard/news",
+      icon: <FaHome className="text-[22px]" />,
     },
     // {
-    //   title: "Drafts",
-    //   link: "/dashboard/drafts",
-    //   icon: <MdScheduleSend className="text-[22px]" />,
+    //   title: "Departments",
+    //   link: "/dashboard/department",
+    //   icon: <IoIosApps className="text-[22px]" />,
+    // },
+    // {
+    //   title: "Manage",
+    //   link: "/dashboard/manage",
+    //   icon: <BiSolidCommentEdit className="text-[22px]" />,
+    // },
+    // {
+    //   title: "Settings",
+    //   link: "/dashboard/settings",
+    //   icon: <IoSettingsSharp className="text-[22px]" />,
     // },
   ];
 
@@ -51,13 +63,13 @@ export default function Sidebar() {
           <Link
             className={`flex text-gray-700 flex-row items-center gap-2 text-2xl py-2 hoverColor relative w-full px-[2vw] ${
               location?.includes(menuItem?.link) &&
-              "bg-primary-100 text-primary-600 font-medium"
+              "bg-primary/10 text-primary font-medium"
             }`}
             key={index}
             href={menuItem?.link}
           >
             {location === menuItem?.link && (
-              <div className="h-full w-2 rounded-r-[20px] absolute left-[-1px] top-0 bg-primary-600"></div>
+              <div className="h-full w-2 rounded-r-[20px] absolute left-[-1px] top-0 bg-primary"></div>
             )}
             <div className="flex mt-[-3px]">{menuItem?.icon}</div>
             <span className="text-[1.1rem]">{menuItem?.title}</span>
