@@ -2,282 +2,259 @@
 
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import {
-  getAuth,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  sendPasswordResetEmail,
-} from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, collection, query, where, getDocs } from "firebase/firestore";
 import { app } from "@lib/firebase";
 import { useRouter } from "next/navigation";
 import easyToast from "@components/CustomToast";
 
-export default function LoginPage() {
-  const [tab, setTab] = useState<"login" | "signup">("login");
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
+export default function Login() {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
+  });
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [showResetModal, setShowResetModal] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [isSendingReset, setIsSendingReset] = useState(false);
-
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsSigningIn(true);
-      const auth = getAuth(app);
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      easyToast({ message: "Login successful", type: "success" });
-      router.push("/dashboard/home");
-    } catch (error) {
-      easyToast({ message: "Google sign-in failed", type: "error" });
-    } finally {
-      setIsSigningIn(false);
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      easyToast({ message: "Email and password required", type: "error" });
-      return;
-    }
-    try {
-      setIsSigningIn(true);
-      const auth = getAuth(app);
-      await signInWithEmailAndPassword(auth, email, password);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
       easyToast({
-        message: "Login successful",
-        desc: "Redirecting to dashboard",
-        type: "success",
-      });
-      router.push("/dashboard/home");
-    } catch (error) {
-      console.log(error)
-      easyToast({
-        message: "Login failed",
-        desc: "Check your credentials.",
+        message: "Please fill in all fields",
         type: "error",
       });
-    } finally {
-      setIsSigningIn(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (!email || !password ) {
-      easyToast({ message: "All fields are required", type: "error" });
       return;
     }
+
     try {
       setIsSigningIn(true);
       const auth = getAuth(app);
-      await createUserWithEmailAndPassword(auth, email, password);
+      const db = getFirestore(app);
+
+      // Sign in with Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+      
+      // Check if user exists in Firestore
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("uid", "==", userCredential.user.uid));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        await auth.signOut();
+        throw new Error("Access denied. User not found in database.");
+      }
+
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+
+      // Verify admin status
+      if (userData.admin !== true) {
+        await auth.signOut();
+        throw new Error("Access denied. You are not an admin.");
+      }
+
+      // Successful login
       easyToast({
-        message: "Account created",
-        desc: "Redirecting to dashboard",
+        message: "Login successful!",
         type: "success",
       });
-      router.push("/dashboard/home");
+      router.push("/dashboard");
+
     } catch (error: any) {
+      console.error("Login error:", error);
+      let errorMessage = "Login failed. Please try again.";
+
+      // Firebase Auth error codes
+      switch (error.code) {
+        case "auth/invalid-email":
+          errorMessage = "Invalid email format.";
+          break;
+        case "auth/user-disabled":
+          errorMessage = "This account has been disabled.";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email.";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many attempts. Try again later.";
+          break;
+        default:
+          // Handle custom errors from our logic
+          if (error.message) {
+            errorMessage = error.message;
+          }
+      }
+
+      setError(errorMessage);
       easyToast({
-        message: "Sign-up failed",
-        desc: error.message || "Something went wrong",
+        message: errorMessage,
         type: "error",
       });
     } finally {
       setIsSigningIn(false);
-    }
-  };
-
-  const handlePasswordReset = async () => {
-    if (!resetEmail) {
-      easyToast({
-        message: "Email required",
-        desc: "Please enter your email to reset your password.",
-        type: "error",
-      });
-      return;
-    }
-
-    try {
-      setIsSendingReset(true);
-      const auth = getAuth(app);
-      await sendPasswordResetEmail(auth, resetEmail);
-      easyToast({
-        message: "Reset email sent",
-        desc: "Check your inbox or spam folder.",
-        type: "success",
-      });
-      setShowResetModal(false);
-      setResetEmail("");
-    } catch (error: any) {
-      easyToast({
-        message: "Reset failed",
-        desc: error.message || "Could not send reset email",
-        type: "error",
-      });
-    } finally {
-      setIsSendingReset(false);
     }
   };
 
   useEffect(() => {
     const auth = getAuth(app);
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      if (currentUser) {
-        router.push("/dashboard/home");
+    const db = getFirestore(app);
+
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          // Check if user is admin
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("uid", "==", user.uid));
+          const querySnapshot = await getDocs(q);
+
+          if (!querySnapshot.empty) {
+            const userData = querySnapshot.docs[0].data();
+            if (userData.admin === true) {
+              router.push("/dashboard");
+              return;
+            }
+          }
+          // If not admin or not found, sign out
+          await auth.signOut();
+        } catch (err) {
+          console.error("Auth state check error:", err);
+        }
       }
       setIsCheckingAuth(false);
     });
+
     return () => unsubscribe();
   }, [router]);
 
   if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p>Loading...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-[5vw]">
-      <Image
-        src={"/Carmelpoly.png"}
-        width={1000}
-        height={1000}
-        className="w-[25rem] mb-10"
-        alt="Logo"
-      />
-
-      <div className="flex items-center space-x-4 mb-6">
-        <button
-          onClick={() => setTab("signup")}
-          className={`text-sm font-medium px-4 py-2 rounded-md ${
-            tab === "signup" ? "bg-primary text-white" : "bg-gray-200"
-          }`}
-        >
-          Create Account
-        </button>
-        <button
-          onClick={() => setTab("login")}
-          className={`text-sm font-medium px-4 py-2 rounded-md ${
-            tab === "login" ? "bg-primary text-white" : "bg-gray-200"
-          }`}
-        >
-          Login
-        </button>
+    <div className="flex flex-col items-center justify-center w-full min-h-screen bg-gray-50">
+      <div className="px-[5vw] py-[3rem]">
+        <Image
+          src="/Carmelpoly.png"
+          width={1000}
+          height={1000}
+          className="w-[28rem]"
+          alt="Logo"
+          priority
+        />
       </div>
 
-      <div className="w-full max-w-sm flex flex-col gap-3">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          className="border border-gray-300 rounded-md px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          disabled={isSigningIn}
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          className="border border-gray-300 rounded-md px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          disabled={isSigningIn}
-        />
-        <button
-          disabled={isSigningIn}
-          onClick={tab === "login" ? handleLogin : handleSignUp}
-          className={`bg-primary text-white rounded-md py-3 text-sm hover:bg-primary ${
-            isSigningIn ? "opacity-70 cursor-not-allowed" : "cursor-pointer"
-          }`}
-        >
-          {isSigningIn
-            ? "Please wait..."
-            : tab === "login"
-            ? "Login"
-            : "Create Account"}
-        </button>
-
-        {tab === "login" && (
-          <button
-            onClick={() => setShowResetModal(true)}
-            className="text-sm text-blue-600 mt-1 hover:underline text-start"
-            disabled={isSigningIn}
-          >
-            Forgot password?
-          </button>
-        )}
-
-        <div className="flex items-center gap-2 w-full mt-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="text-gray-400 text-sm">OR</span>
-          <hr className="flex-grow border-gray-300" />
-        </div>
-
-        <button
-          disabled={isSigningIn}
-          className={`flex items-center justify-center border border-gray-400 bg-white gap-3 py-3 rounded-md ${
-            isSigningIn ? "opacity-70" : ""
-          }`}
-          onClick={handleGoogleSignIn}
-        >
+      <div className="flex lg:flex-row md:flex-row flex-col items-center justify-center w-full max-w-6xl mx-auto">
+        <div className="flex-[1.5] w-full flex items-center justify-center">
           <Image
-            src={"/google.png"}
+            src="/login.svg"
             width={1000}
             height={1000}
-            className="w-[2rem]"
-            alt="Google logo"
+            className="md:w-[28rem] w-[15rem]"
+            alt="Login Illustration"
+            priority
           />
-          <span>Continue with Google</span>
-        </button>
-      </div>
+        </div>
 
-      {/* Forgot Password Modal */}
-      {showResetModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30">
-          <div className="bg-white w-full max-w-sm rounded-lg p-6 shadow-lg relative">
-            <h2 className="text-lg font-semibold mb-2">Reset Password</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Enter your email to receive a reset link.
-            </p>
-            <input
-              type="email"
-              value={resetEmail}
-              onChange={(e) => setResetEmail(e.target.value)}
-              placeholder="Email address"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm w-full mb-4"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                className="text-gray-600 text-sm"
-                onClick={() => {
-                  setShowResetModal(false);
-                  setResetEmail("");
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePasswordReset}
-                className="bg-primary text-white px-4 py-2 rounded-md text-sm hover:bg-primary"
-                disabled={isSendingReset}
-              >
-                {isSendingReset ? "Sending..." : "Send Reset Link"}
-              </button>
+        <div className="flex-1 w-full max-w-md px-6 py-8 bg-white rounded-lg shadow-md">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
+              <p className="text-gray-600 mt-2">
+                Sign in to access the dashboard
+              </p>
             </div>
+
+            {error && (
+              <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSigningIn}
+              className={`w-full px-4 py-2 bg-primary text-white font-medium rounded-md hover:bg-primary transition-colors ${
+                isSigningIn ? "opacity-70 cursor-not-allowed" : ""
+              }`}
+            >
+              {isSigningIn ? (
+                <span className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Signing in...
+                </span>
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>For authorized personnel only</p>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

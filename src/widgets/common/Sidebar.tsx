@@ -10,7 +10,8 @@ import { MdScheduleSend } from "react-icons/md";
 import { getAuth, signOut } from "firebase/auth";
 import easyToast from "@components/CustomToast";
 import { IoSettingsSharp } from "react-icons/io5";
-import { BiSolidCommentEdit } from "react-icons/bi";
+import { FaRegNewspaper } from "react-icons/fa6";
+import { BsCalendarEventFill } from "react-icons/bs";
 
 export default function Sidebar() {
   const location = usePathname();
@@ -19,12 +20,17 @@ export default function Sidebar() {
     {
       title: "Home",
       link: "/dashboard/home",
-      icon: <FaHome className="text-[22px]" />,
+      icon: <FaHome className="text-[20px]" />,
     },
      {
-      title: "News",
+      title: "Manage News",
       link: "/dashboard/news",
-      icon: <FaHome className="text-[22px]" />,
+      icon: <FaRegNewspaper className="text-[20px]" />,
+    },
+    {
+      title: "Manage Events",
+      link: "/dashboard/events",
+      icon: <BsCalendarEventFill className="text-[19px]" />,
     },
     // {
     //   title: "Departments",
@@ -61,7 +67,7 @@ export default function Sidebar() {
       <div className="mt-[5vh] w-full flex flex-col gap-1">
         {menuItems?.map((menuItem, index) => (
           <Link
-            className={`flex text-gray-700 flex-row items-center gap-2 text-2xl py-2 hoverColor relative w-full px-[2vw] ${
+            className={`flex text-gray-700 flex-row items-center gap-2 text-xl py-2 hoverColor relative w-full px-[2vw] ${
               location?.includes(menuItem?.link) &&
               "bg-primary/10 text-primary font-medium"
             }`}
