@@ -8,12 +8,71 @@ body {
   padding: 0;
   margin: 0;
   font-family: $font-family;
-  background-color: #F9FAFB;
+  scroll-behavior: smooth;
 }
 
-@media (max-width: 640px) {
-  * {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+.text-stroke-white {
+  -webkit-text-stroke: 1px white; /* Stroke width & color */
+}
+
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 40s linear infinite;
+}
+
+/* This is now handled by the isPaused state */
+/* .animate-marquee:hover {
+  animation-play-state: paused;
+} */
+
+
+.marquee-container {
+  position: relative;
+}
+
+.marquee-container::before,
+.marquee-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50px;
+  z-index: 2;
+}
+
+.marquee-container::before {
+  left: 0;
+  background: linear-gradient(to right, var(--primary-100), transparent);
+}
+
+.marquee-container::after {
+  right: 0;
+  background: linear-gradient(to left, var(--primary-100), transparent);
+}
+
+.marquee-content {
+  display: inline-flex;
+  animation: scroll 50s linear infinite;
+}
+
+.marquee-container:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
   }
 }
